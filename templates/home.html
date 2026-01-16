@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Meeting Summarizer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #f1f5f9;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            background: var(--secondary-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-upload:hover .file-upload-label {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.05);
+            color: var(--primary-color);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .chat-history {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .chat-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .chat-item:hover {
+            background: var(--secondary-color);
+        }
+
+        .chat-item:last-child {
+            border-bottom: none;
+        }
+
+        .chat-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .chat-info p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .radio-item input[type="radio"] {
+            margin: 0;
+        }
+
+        .past-messages {
+            background: var(--secondary-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .past-message {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .past-message:last-child {
+            margin-bottom: 0;
+        }
+
+        .past-message-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-users"></i> AI Chat Summarizer</h1>
+            
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'danger' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="main-card">
+            <div class="card-header">
+                <i class="fas fa-comment-alt"></i>
+                <h2>New Meeting Summary</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="form-label">Chat Option</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio" id="new_chat" name="chat_option" value="new" 
+                                       {{ 'checked' if not continue_chat_id else '' }}>
+                                <label for="new_chat">Start New Chat</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="continue_chat" name="chat_option" value="continue"
+                                       {{ 'checked' if continue_chat_id else '' }}>
+                                <label for="continue_chat">Continue Existing Chat</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chat_id" class="form-label">
+                            <i class="fas fa-tag"></i> Chat ID (optional for new, required for continue)
+                        </label>
+                        <input type="text" id="chat_id" name="chat_id" class="form-control" 
+                               placeholder="Leave empty for auto-generated ID"
+                               value="{{ continue_chat_id or '' }}">
+                    </div>
+
+                    {% if past_messages %}
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-history"></i> Previous Messages
+                        </label>
+                        <div class="past-messages">
+                            {% for msg in past_messages[-5:] %}
+                            <div class="past-message">
+                                <div class="past-message-time">
+                                    {{ msg.timestamp if msg.timestamp else 'Unknown time' }}
+                                </div>
+                                <div>{{ msg.message[:200] }}{% if msg.message|length > 200 %}...{% endif %}</div>
+                            </div>
+                            {% endfor %}
+                            {% if past_messages|length > 5 %}
+                            <p class="past-message-time" style="text-align: center; margin-top: 0.5rem;">
+                                ... and {{ past_messages|length - 5 }} more messages
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="message" class="form-label">
+                            <i class="fas fa-pen"></i> Meeting Notes / Conversation *
+                        </label>
+                        <textarea id="message" name="message" class="form-control" required
+                                  placeholder="Enter your meeting notes, discussion points, or paste conversation transcript here..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-paperclip"></i> Upload Document (Optional)
+                        </label>
+                        <div class="file-upload">
+                            <input type="file" id="file" name="file" accept=".pdf,.docx,.doc,.txt">
+                            <label for="file" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt fa-lg"></i>
+                                <span>Drop a file here or click to browse</span>
+                            </label>
+                        </div>
+                        <small style="color: var(--text-secondary); margin-top: 0.5rem; display: block;">
+                            Supported formats: PDF, DOCX, DOC, TXT (Max 25MB)
+                        </small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-magic"></i>
+                        Generate Summary
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if chat_files %}
+        <div class="chat-history">
+            <div class="card-header">
+                <i class="fas fa-history"></i>
+                <h2>Recent Chat History</h2>
+            </div>
+            {% for chat_file in chat_files[:10] %}
+            <div class="chat-item">
+                <div class="chat-info">
+                    <h4>Chat {{ chat_file }}</h4>
+                    <p>Click to continue this conversation</p>
+                </div>
+                <a href="{{ url_for('continue_chat', chat_id=chat_file) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-right"></i>
+                    Continue
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // File upload enhancement
+        const fileInput = document.getElementById('file');
+        const fileLabel = document.querySelector('.file-upload-label span');
+        
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                fileLabel.textContent = `Selected: ${fileName}`;
+            } else {
+                fileLabel.textContent = 'Drop a file here or click to browse';
+            }
+        });
+
+        // Drag and drop
+        const fileUpload = document.querySelector('.file-upload');
+        
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--primary-color)';
+            this.style.backgroundColor = 'rgba(37, 99, 235, 0.05)';
+        });
+        
+        fileUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+            this.style.backgroundColor = 'var(--secondary-color)';
+        });
+        
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+            this.style.backgroundColor = 'var(--secondary-color)';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileLabel.textContent = `Selected: ${files[0].name}`;
+            }
+        });
+    </script>
+</body>
+</html>

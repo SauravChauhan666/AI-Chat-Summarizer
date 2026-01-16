@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Summary Results</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #f1f5f9;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #0ea5e9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-header.summary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; }
+        .card-header.action-points { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; border: none; }
+        .card-header.dates { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; border: none; }
+        .card-header.documents { background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; border: none; }
+        .card-header.detailed { background: linear-gradient(135deg, #fa709a, #fee140); color: white; border: none; }
+        .card-header.confidence { background: linear-gradient(135deg, #a8edea, #fed6e3); color: var(--text-primary); border: none; }
+
+        .card-body {
+            padding: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .card-body ul, .card-body ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .card-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        .card-body p {
+            margin-bottom: 1rem;
+        }
+
+        .card-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .empty-state {
+            color: var(--text-secondary);
+            font-style: italic;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .raw-output {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .save-form {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible:hover {
+            opacity: 0.8;
+        }
+
+        .collapsible::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .collapsible.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .collapse-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapse-content.collapsed {
+            max-height: 0;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .raw-output-container {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        .icon-summary { color: #667eea; }
+        .icon-action { color: #f5576c; }
+        .icon-calendar { color: #00f2fe; }
+        .icon-document { color: #38f9d7; }
+        .icon-detailed { color: #fa709a; }
+        .icon-confidence { color: #a8edea; }
+
+        /* Bullet point styling */
+        .card-body ul li::marker {
+            color: var(--primary-color);
+        }
+
+        /* Custom bullet points for action items */
+        .action-points ul li {
+            position: relative;
+            list-style: none;
+            padding-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .action-points ul li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-check-circle"></i> Meeting Summary Generated</h1>
+            <p>Chat ID: <strong>{{ chat_id }}</strong></p>
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('home') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                New Summary
+            </a>
+            <a href="{{ url_for('continue_chat', chat_id=chat_id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i>
+                Continue Chat
+            </a>
+            <button onclick="printSummary()" class="btn btn-outline">
+                <i class="fas fa-print"></i>
+                Print Summary
+            </button>
+            <button onclick="copyToClipboard()" class="btn btn-outline">
+                <i class="fas fa-copy"></i>
+                Copy All
+            </button>
+        </div>
+
+        <div class="summary-grid">
+            <!-- Summary Section -->
+            <div class="summary-card">
+                <div class="card-header summary">
+                    <i class="fas fa-list-ul"></i>
+                    <span>Executive Summary</span>
+                </div>
+                <div class="card-body">
+                    {% if sections.Summary %}
+                        {{ sections.Summary | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <div class="empty-state">No summary available</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Points Section -->
+            <div class="summary-card">
+                <div class="card-header action-points">
+                    <i class="fas fa-tasks"></i>
+                    <span>Action Points</span>
+                </div>
+                <div class="card-body action-points">
+                    {% if sections['Action Points'] %}
+                        {{ sections['Action Points'] | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <div class="empty-state">No action points identified</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Dates & Deadlines Section -->
+            <div class="summary-card">
+                <div class="card-header dates">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Dates & Deadlines</span>
+                </div>
+                <div class="card-body">
+                    {% if sections['Dates & Deadlines'] %}
+                        {{ sections['Dates & Deadlines'] | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <div class="empty-state">No specific dates mentioned</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Document Summary Section -->
+            <div class="summary-card">
+                <div class="card-header documents">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Document Summary</span>
+                </div>
+                <div class="card-body">
+                    {% if sections['Document Summary'] %}
+                        {{ sections['Document Summary'] | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <div class="empty-state">No documents uploaded</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Detailed Summary Section -->
+            <div class="summary-card">
+                <div class="card-header detailed collapsible" onclick="toggleSection('detailed-content')">
+                    <i class="fas fa-list-ol"></i>
+                    <span>Detailed Summary</span>
+                </div>
+                <div class="card-body collapse-content" id="detailed-content">
+                    {% if sections['Detailed Summary'] %}
+                        {{ sections['Detailed Summary'] | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <div class="empty-state">No detailed summary available</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Confidence Section -->
+            <div class="summary-card">
+                <div class="card-header confidence">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Confidence Level</span>
+                </div>
+                <div class="card-body">
+                    {% if sections.Confidence %}
+                        {{ sections.Confidence | replace('\n', '<br>') | safe }}
+                    {% else %}
+                        <div class="empty-state">No confidence assessment available</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Conversation Form -->
+        <div class="save-form">
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">
+                <i class="fas fa-save"></i> Save This Conversation
+            </h3>
+            <form action="{{ url_for('save_conversation') }}" method="POST">
+                <div class="form-group">
+                    <label for="conversation_name" class="form-label">Conversation Name</label>
+                    <input type="text" id="conversation_name" name="conversation_name" 
+                           class="form-control" placeholder="Enter a name for this conversation..."
+                           value="Meeting Summary {{ chat_id }}">
+                </div>
+                <input type="hidden" name="conversation_data" value="{{ conversation_data }}">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i>
+                    Save Conversation
+                </button>
+            </form>
+        </div>
+
+        <!-- Raw Output (Collapsible) -->
+        <div class="summary-card">
+            <div class="card-header collapsible" onclick="toggleSection('raw-output')" 
+                 style="background: #1e293b; color: white;">
+                <i class="fas fa-code"></i>
+                <span>Raw AI Output</span>
+            </div>
+            <div class="card-body collapse-content collapsed" id="raw-output" style="padding: 0;">
+                <div class="raw-output-container">
+                    <button class="copy-btn" onclick="copyRawOutput()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <div class="raw-output" id="raw-text">{{ raw_text }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            const header = content.previousElementSibling;
+            
+            content.classList.toggle('collapsed');
+            header.classList.toggle('collapsed');
+        }
+
+        function printSummary() {
+            // Hide non-essential elements for printing
+            const actions = document.querySelector('.actions');
+            const saveForm = document.querySelector('.save-form');
+            const rawOutput = document.querySelector('.summary-card:last-child');
+            
+            actions.style.display = 'none';
+            saveForm.style.display = 'none';
+            rawOutput.style.display = 'none';
+            
+            window.print();
+            
+            // Restore elements after printing
+            setTimeout(() => {
+                actions.style.display = 'flex';
+                saveForm.style.display = 'block';
+                rawOutput.style.display = 'block';
+            }, 1000);
+        }
+
+        function copyToClipboard() {
+            let summaryText = '';
+            
+            // Extract text from each section
+            const sections = ['Summary', 'Action Points', 'Dates & Deadlines', 'Document Summary', 'Detailed Summary', 'Confidence'];
+            
+            sections.forEach(sectionName => {
+                const sectionElement = document.querySelector(`[data-section="${sectionName}"]`) || 
+                    Array.from(document.querySelectorAll('.card-header span')).find(el => 
+                        el.textContent.includes(sectionName.replace('&', '&')))?.closest('.summary-card');
+                
+                if (sectionElement) {
+                    const content = sectionElement.querySelector('.card-body').innerText.trim();
+                    if (content && !content.includes('No ') && !content.includes('available')) {
+                        summaryText += `${sectionName.toUpperCase()}:\n${content}\n\n`;
+                    }
+                }
+            });
+            
+            navigator.clipboard.writeText(summaryText).then(() => {
+                // Show temporary success message
+                const btn = event.target.closest('.btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                }, 2000);
+            });
+        }
+
+        function copyRawOutput() {
+            const rawText = document.getElementById('raw-text').textContent;
+            navigator.clipboard.writeText(rawText).then(() => {
+                const btn = event.target;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            });
+        }
+
+        // Print styles
+        const printStyles = `
+            @media print {
+                body { 
+                    background: white !important; 
+                    color: black !important;
+                }
+                .container { 
+                    max-width: none !important;
+                    padding: 0 !important;
+                }
+                .summary-card {
+                    box-shadow: none !important;
+                    border: 1px solid #ddd !important;
+                    page-break-inside: avoid;
+                    margin-bottom: 1rem !important;
+                }
+                .card-header {
+                    background: #f5f5f5 !important;
+                    color: black !important;
+                    border-bottom: 1px solid #ddd !important;
+                }
+                .actions, .save-form, .raw-output-container {
+                    display: none !important;
+                }
+                .header {
+                    color: black !important;
+                    margin-bottom: 1rem !important;
+                }
+                .collapse-content.collapsed {
+                    max-height: none !important;
+                }
+            }
+        `;
+
+        // Add print styles to head
+        const styleSheet = document.createElement('style');
+        styleSheet.innerText = printStyles;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>
